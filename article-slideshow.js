@@ -12,9 +12,6 @@ var Templater = Templater || (function($) {
 		};
 
 		var slide = args.slide || {
-			get: function(s) {
-				return $(slide.html(s));
-			},
 			html: function(s) {
 				var slide = $.extend({}, structs.slide, s);
 				return $.trim(slide.image) === '' ? ''
@@ -28,9 +25,6 @@ var Templater = Templater || (function($) {
 		};
 
 		var thumbnail = args.thumbnail || {
-			get: function(s) {
-				return $(thumbnail.html(s));
-			},
 			html: function(s) {
 				var slide = $.extend({}, structs.slides, s);
 				return $.trim(slide.image) === '' ? ''
@@ -41,6 +35,11 @@ var Templater = Templater || (function($) {
 					].join('');
 			},
 		};
+
+		// Make getters for the objects.
+		[slide, thumbnail].forEach(function(x) {
+			x.get = function(s) { return $(x.html(s)); };
+		});
 
 		return {
 			'slide': slide,
@@ -162,9 +161,6 @@ test_slides.push({
 var custom_template = (function($) {
 	return new Templater({
 		thumbnail: {
-			get: function(s) {
-				return $(custom_template.thumbnail.html(s));
-			},
 			html: function(s) {
 				var slide = $.extend({}, custom_template.slides, s);
 				return $.trim(slide.image) === '' ? ''
