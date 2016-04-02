@@ -230,38 +230,3 @@ test_slides.push({
 
 var article_slideshow = new ArticleSlideshow();
 article_slideshow.init({ 'slides': test_slides });
-
-/*
-
-	 <!-- Controls -->
-	 <a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">
-	 <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-	 <span class="sr-only">Previous</span>
-	 </a>
-	 <a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next">
-	 <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-	 <span class="sr-only">Next</span>
-	 </a>
-
-*/
-
-// CAROUSEL DATA-API
-// =================
-
-// var clickHandler = function(e) {
-//   var href
-//   var $this = $(this)
-//   var $target = $($this.attr('data-target') || (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '')) // strip for ie7
-//   if (!$target.hasClass('carousel')) return
-//   var options = $.extend({}, $target.data(), $this.data())
-//   var slideIndex = $this.attr('data-slide-to')
-//   if (slideIndex) options.interval = false
-
-//   Plugin.call($target, options)
-
-//   if (slideIndex) {
-//     $target.data('bs.carousel').to(slideIndex)
-//   }
-
-//   e.preventDefault()
-// }
