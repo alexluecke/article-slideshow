@@ -31,7 +31,6 @@ var Templater = Templater || (function($) {
 				return $.trim(slide.image) === '' ? ''
 					: [
 						"<li data-target='#article-slideshow-wrapper'",
-						" data-slide-to='" + slide.index + "'",
 						" class='thumbnail" + (slide.active ? ' active' : '') + "'>",
 						"<div class='cover' style='background-image: url(" + slide.image + ");'>&nbsp;</div>",
 						"</li>"
@@ -61,6 +60,12 @@ var ArticleSlideshow = (function($) {
 
 		var App = {};
 		var _t = null;
+		var active_index = 0;
+
+		var cache = {
+			'slides': null,
+			'thumbnails': null,
+		};
 
 		// Provider elements reference slideshow provider elements
 		// (i.e. Twitter Bootstrap)
@@ -68,7 +73,9 @@ var ArticleSlideshow = (function($) {
 			nonce: '',
 			elements: {
 				'wrap': '#article-slideshow-wrapper',
-				'thumbnails_container': '.thumbnails',
+				thumbnails: {
+					container: '.thumbnails',
+				},
 				provider: {
 					'target': '#article-slideshow', // id of the carousel object
 					'container': '.carousel-inner' // id of the carousel object
@@ -85,38 +92,86 @@ var ArticleSlideshow = (function($) {
 				'target': null,
 				'container': null
 			},
+			thumbnails: {
+				container: null,
+			},
 			'wrap': null,
-			'thumbnails_container': null,
 		};
 
 		function log(e) {
 			console.log(e.name + ": " + e.message);
 		}
 
-		function loadElementCache() {
+		function setupContent() {
 			App.elements.provider.target = $(App.conf.elements.provider.target);
 			App.elements.provider.container = App.elements.provider.target
 				.find(App.conf.elements.provider.container).first();
 			App.elements.wrap = $(App.conf.elements.wrap);
-			App.elements.thumbnails_container = App.elements.wrap
-				.find(App.conf.elements.thumbnails_container).first();
+			App.elements.thumbnails.container = App.elements.wrap
+				.find(App.conf.elements.thumbnails.container).first();
+			// Now that the containers have been loaded/cached, append slide content:
+			setupSlides();
 		}
 
-		function loadContent() {
+		function setupSlides() {
 			App.slides.forEach(function(slide) {
 				App.elements.provider.container.append(_t.slide.get(slide));
 			});
-			App.elements.thumbnails_container.append(
-				App.slides.map(function(x) {
-					return _t.thumbnail.html(x);
-				}).join("\n")
-			);
+			App.slides.forEach(function(x) {
+				App.elements.thumbnails.container.append(
+						_t.thumbnail.get(x)
+					);
+			});
+			// Now that all slides are loaded, cache existing content:
+			cacheSlides();
+			cacheThumbnails();
+			setupEvents();
+		}
+
+		function cacheSlides() {
+			cache.slides = App.elements.provider.container.find('.item');
+		}
+
+		function cacheThumbnails() {
+			cache.thumbnails = App.elements.thumbnails.container.find('.thumbnail');
+		}
+
+		function setupEvents() {
+			cache.thumbnails.each(function(idx) {
+				var $el = $(this);
+				$el.on('click', function(ev) {
+					App.elements.provider.target.data('bs.carousel').to(idx);
+					cache.thumbnails.removeClass('active');
+					$el.addClass('active');
+					active_index = idx;
+				});
+			});
+			App.elements.provider.target.on('slid.bs.carousel', function () {
+				cache.slides.each(function(idx) {
+					if ($(this).hasClass('active')) active_index = idx;
+				});
+			});
+			cache.thumbnails.each(function(idx) {
+				if (idx !== active_index) $(this).removeClass('active');
+			});
 		}
 
 		function setActiveSlide(idx) {
 			idx = Number.parseInt(idx || 0);
 			App.slides.forEach(function(x) { x.active = false; });
 			App.slides[idx].active = true;
+		}
+
+		function mergeProvidedSlides(slides) {
+			if (Array.isArray(slides)) {
+				var idx = 0;
+				slides.filter(function(x) {
+					return $.trim(x.image) !== '';
+				}).forEach(function(x) {
+					x.index = idx; idx++;
+					App.slides.push($.extend({}, _t.structs.slide, x));
+				});
+			}
 		}
 
 		App.init = function(args) {
@@ -126,25 +181,27 @@ var ArticleSlideshow = (function($) {
 			$(App.conf, args.conf || {});
 			$(App.elements.provider, args.elements || {});
 
-			// If user wants to provide their own templates.
+			// If user wants to provide their own templates for slides, thumbnails,
+			// and article text:
 			_t = args.templater || new Templater();
 
-			// Merge provided slides into App.slides
-			if (Array.isArray(args.slides)) {
-				var idx = 0;
-				args.slides.filter(function(x) {
-					return $.trim(x.image) !== '';
-				}).forEach(function(x) {
-					x.index = idx; idx++;
-					App.slides.push($.extend({}, _t.structs.slide, x));
-				});
-			}
+			mergeProvidedSlides(args.slides);
 
 			if (App.slides.length === 0) return;
 
 			setActiveSlide(0);
-			loadElementCache();
-			loadContent();
+
+			/*
+			 * Setup content goes through the following stages:
+			 *  1. It caches/saves all containers to this object
+			 *  2. It appends all slides to the appropriate containers and caches
+			 *  them.
+			 *  3. It sets up any events needed for the slideshow, including click
+			 *  and slide.
+			 */
+			setupContent();
+
+			$(App.elements.provider.target).carousel({ interval: false });
 
 		};
 
@@ -166,12 +223,13 @@ test_slides.push({
 	'image': '/wp-content/uploads/2016/02/stock-photo-19952282-bamboo-yoga.jpg',
 	'text': 'Testing the first slide 3.',
 });
+test_slides.push({
+	'image': '/wp-content/uploads/2016/02/stock-photo-19952282-bamboo-yoga.jpg',
+	'text': 'Testing the first slide 4.',
+});
 
 var article_slideshow = new ArticleSlideshow();
-
-article_slideshow.init({
-	'slides': test_slides
-});
+article_slideshow.init({ 'slides': test_slides });
 
 /*
 
@@ -186,3 +244,24 @@ article_slideshow.init({
 	 </a>
 
 */
+
+// CAROUSEL DATA-API
+// =================
+
+// var clickHandler = function(e) {
+//   var href
+//   var $this = $(this)
+//   var $target = $($this.attr('data-target') || (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '')) // strip for ie7
+//   if (!$target.hasClass('carousel')) return
+//   var options = $.extend({}, $target.data(), $this.data())
+//   var slideIndex = $this.attr('data-slide-to')
+//   if (slideIndex) options.interval = false
+
+//   Plugin.call($target, options)
+
+//   if (slideIndex) {
+//     $target.data('bs.carousel').to(slideIndex)
+//   }
+
+//   e.preventDefault()
+// }
