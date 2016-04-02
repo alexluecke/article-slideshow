@@ -152,6 +152,8 @@ var ArticleSlideshow = (function($) {
 			});
 		}
 
+		// TODO: I need to figure out a way to consolidate this method with the set
+		// click events that set the active slide based on the dom.
 		function setActiveSlide(idx) {
 			idx = Number.parseInt(idx || 0);
 			App.slides.forEach(function(x) { x.active = false; });
