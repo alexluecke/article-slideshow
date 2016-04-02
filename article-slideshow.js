@@ -190,8 +190,8 @@ var ArticleSlideshow = (function($) {
 
 			args = args || {};
 
-			$(App.conf, args.conf || {});
-			$(App.elements.provider, args.elements || {});
+			$.extend(App.conf, args.conf || {});
+			$.extend(App.elements.provider, args.elements || {});
 
 			// If user wants to provide their own templates for slides, thumbnails,
 			// and article text:
