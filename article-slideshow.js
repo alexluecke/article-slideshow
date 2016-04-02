@@ -165,9 +165,9 @@ var custom_template = (function($) {
 				var slide = $.extend({}, custom_template.slides, s);
 				return $.trim(slide.image) === '' ? ''
 					: [
-					"<img style='width: 100px; height: 100px; float: right;'",
-					" class='thumbnail" + (slide.active ? ' active' : '') + "'",
-					" src='" + slide.image + "' alt='" + slide.alt + "'>"
+						"<img style='width: 100px; height: 100px; float: right;'",
+						" class='thumbnail" + (slide.active ? ' active' : '') + "'",
+						" src='" + slide.image + "' alt='" + slide.alt + "'>"
 					].join('');
 			},
 		},
