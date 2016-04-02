@@ -1,131 +1,148 @@
-var ArticleSlideshow = (function($) {
-	var App = {};
+var Templater = Templater || (function($) {
+	return $ === null ? null : function(args) {
+		args = args || {};
 
-	// Provider elements reference slideshow provider elements
-	// (i.e. Twitter Bootstrap)
-	App.conf = {
-		nonce: '',
-		elements: {
-			'wrap': '#article-slideshow-wrapper',
-			'thumbnails_container': '.thumbnails',
-			provider: {
-				'target': '#article-slideshow', // id of the carousel object
-				'container': '.carousel-inner' // id of the carousel object
-			},
-		},
-		dims: {},
-	};
-
-	// Slides are an array of image objects.
-	App.slides = [];
-
-	// cache for dom elements
-	App.elements = {
-		provider: {
-			'target': null,
-			'container': null
-		},
-	};
-
-	$.fn.exists = function() {
-		return this.length > 0;
-	};
-
-	function ImageException(message) {
-		this.message = message || 'No message provided.';
-		this.name =  "ImageException";
-	}
-
-	function log(e) {
-		console.log(e.name + ": " + e.message);
-	}
-
-	function getImgObj() {
-		return {
-			'active': '',
-			'image': '',
-			'alt': '',
-			'text': '',
+		var structs = {
+			'slide': {
+				'active': false,
+				'image': '',
+				'alt': '',
+				'text': '',
+			}
 		};
-	}
 
-	/*
-	 * getSlideHtml can be passed in as a config argument if you wish to change
-	 * the basic slide structure to something else.
-	 */
-	App.getSlideHtml = function(s) {
-		var slide = $.extend({}, getImgObj(), s);
+		var slide = args.slide || {
+			get: function(s) {
+				return $(slide.html(s));
+			},
+			html: function(s) {
+				var slide = $.extend({}, structs.slide, s);
+				return $.trim(slide.image) === '' ? ''
+					: [
+						"<div class='item" + (slide.active ? ' active' : '') + "'>",
+						"\t<img src='" + slide.image + "' alt='" + slide.alt + "'>",
+						"\t<div class='carousel-caption'>" + slide.text + "</div>",
+						"</div>"
+					].join("\n");
+			},
+		};
 
-		if (slide.image === '')
-			throw new ImageException("No slide image provided to App.getSlideHtml.");
+		var thumbnail = args.thumbnail || {
+			get: function(s) {
+				return $(thumbnail.html(s));
+			},
+			html: function(s) {
+				var slide = $.extend({}, structs.slides, s);
+				return $.trim(slide.image) === '' ? ''
+					: [
+						"<img style='width: 50px; height: 50px; float: left;'",
+						" class='thumbnail" + (slide.active ? ' active' : '') + "'",
+						" src='" + slide.image + "' alt='" + slide.alt + "'>"
+					].join('');
+			},
+		};
 
-		return "<div class='item" + (slide.active ? ' active' : '') + "'>" +
-			"<img src='" + slide.image + "' alt='" + slide.alt + "'>" +
-			"<div class='carousel-caption'>" + slide.text + "</div>" +
-			"</div>";
+		return {
+			'slide': slide,
+			'thumbnail': thumbnail,
+			'structs': structs,
+		};
 	};
+})(jQuery);
 
-	function getSlideObj(slide) {
-		return $(App.getSlideHtml(slide));
-	}
+var ArticleSlideshow = (function($) {
+	return $ === null ? null : function() {
 
-	/*
-	 * getSlideHtml can be passed in as a config argument if you wish to change
-	 * the basic slide structure to something else.
-	 */
-	App.getThumbHtml = function(s) {
-		var slide = $.extend({}, getImgObj(), s);
+		$.fn.exists = function() {
+			return this.length > 0;
+		};
 
-		if (slide.image === '')
-			throw new ImageException("No slide image provided to App.getSlideHtml.");
+		var App = {};
+		var _t = null;
 
-		return "<img style='width: 50px; height: 50px; float: left;'" + 
-			" class='thumbnail" + (slide.active ? ' active' : '') + "'" +
-			" src='" + slide.image + "' alt='" + slide.alt + "'>";
-	};
+		// Provider elements reference slideshow provider elements
+		// (i.e. Twitter Bootstrap)
+		App.conf = {
+			nonce: '',
+			elements: {
+				'wrap': '#article-slideshow-wrapper',
+				'thumbnails_container': '.thumbnails',
+				provider: {
+					'target': '#article-slideshow', // id of the carousel object
+					'container': '.carousel-inner' // id of the carousel object
+				},
+			},
+		};
 
-	function getThumbObj(slide) {
-		return $(App.getThumbHtml(slide));
-	}
+		// Slides are an array of objects.
+		App.slides = [];
 
-	App.init = function(options) {
+		// cache for dom elements
+		App.elements = {
+			provider: {
+				'target': null,
+				'container': null
+			},
+			'wrap': null,
+			'thumbnails_container': null,
+		};
 
-		$(App.conf, options.conf || {});
-		$(App.elements.provider, options.elements || {});
-		App.getSlideHtml = options.getSlideHtml || App.getSlideHtml;
+		function log(e) {
+			console.log(e.name + ": " + e.message);
+		}
 
-		// Merge provided slides into App.slides
-		if (Array.isArray(options.slides)) {
-			options.slides.filter(function(x) {
-				return $.trim(x.image) !== '';
-			}).forEach(function(x) {
-				App.slides.push($.extend({}, getImgObj(), x));
+		function loadElementCache() {
+			App.elements.provider.target = $(App.conf.elements.provider.target);
+			App.elements.provider.container = App.elements.provider.target
+				.find(App.conf.elements.provider.container).first();
+			App.elements.wrap = $(App.conf.elements.wrap);
+			App.elements.thumbnails_container = App.elements.wrap
+				.find(App.conf.elements.thumbnails_container).first();
+		}
+
+		function loadContent() {
+			App.slides.forEach(function(slide) {
+				App.elements.provider.container.append(_t.slide.get(slide));
+				App.elements.thumbnails_container.append(_t.thumbnail.get(slide));
 			});
 		}
 
-		App.slides.forEach(function(x) {
-			x.active = false;
-		});
+		function setActiveSlide(idx) {
+			idx = Number.parseInt(idx || 0);
+			App.slides.forEach(function(x) { x.active = false; });
+			App.slides[idx].active = true;
+		}
 
-		if (App.slides.length === 0)
-			return;
+		App.init = function(args) {
 
-		App.slides[0].active = true;
-		App.elements.provider.target = $(App.conf.elements.provider.target);
-		App.elements.provider.container = App.elements.provider.target
-			.find(App.conf.elements.provider.container).first();
-		App.elements.wrap = $(App.conf.elements.wrap);
-		App.elements.thumbnails_container = App.elements.wrap
-			.find(App.conf.elements.thumbnails_container).first();
+			args = args || {};
 
-		App.slides.forEach(function(slide) {
-			App.elements.provider.container.append(getSlideObj(slide));
-			App.elements.thumbnails_container.append(getThumbObj(slide));
-		});
+			$(App.conf, args.conf || {});
+			$(App.elements.provider, args.elements || {});
+
+			// If user wants to provide their own templates.
+			_t = args.templater || new Templater();
+
+			// Merge provided slides into App.slides
+			if (Array.isArray(args.slides)) {
+				args.slides.filter(function(x) {
+					return $.trim(x.image) !== '';
+				}).forEach(function(x) {
+					App.slides.push($.extend({}, _t.structs.slide, x));
+				});
+			}
+
+			if (App.slides.length === 0) return;
+
+			setActiveSlide(0);
+			loadElementCache();
+			loadContent();
+
+		};
+
+		return App;
+
 	};
-
-	return App;
-
 })(jQuery);
 
 var test_slides = [];
@@ -142,8 +159,30 @@ test_slides.push({
 	'text': 'Testing the first slide 3.',
 });
 
-ArticleSlideshow.init({
+var custom_template = (function($) {
+	return new Templater({
+		thumbnail: {
+			get: function(s) {
+				return $(custom_template.thumbnail.html(s));
+			},
+			html: function(s) {
+				var slide = $.extend({}, custom_template.slides, s);
+				return $.trim(slide.image) === '' ? ''
+					: [
+					"<img style='width: 100px; height: 100px; float: right;'",
+					" class='thumbnail" + (slide.active ? ' active' : '') + "'",
+					" src='" + slide.image + "' alt='" + slide.alt + "'>"
+					].join('');
+			},
+		},
+	});
+})(jQuery);
+
+var article_slideshow = new ArticleSlideshow();
+
+article_slideshow.init({
 	'slides': test_slides,
+	'templater': custom_template,
 });
 
 /*
