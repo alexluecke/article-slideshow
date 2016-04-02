@@ -109,8 +109,6 @@ var ArticleSlideshow = (function($) {
 			App.elements.wrap = $(App.conf.elements.wrap);
 			App.elements.thumbnails.container = App.elements.wrap
 				.find(App.conf.elements.thumbnails.container).first();
-			// Now that the containers have been loaded/cached, append slide content:
-			setupSlides();
 		}
 
 		function setupSlides() {
@@ -119,13 +117,11 @@ var ArticleSlideshow = (function($) {
 			});
 			App.slides.forEach(function(x) {
 				App.elements.thumbnails.container.append(
-						_t.thumbnail.get(x)
-					);
+					_t.thumbnail.get(x)
+				);
 			});
-			// Now that all slides are loaded, cache existing content:
 			cacheSlides();
 			cacheThumbnails();
-			setupEvents();
 		}
 
 		function cacheSlides() {
@@ -174,6 +170,20 @@ var ArticleSlideshow = (function($) {
 			}
 		}
 
+		function serializedSetup() {
+			/*
+			 * Setup content goes through the following stages:
+			 *  1. It caches/saves all containers to this object
+			 *  2. It appends all slides to the appropriate containers and caches
+			 *  them.
+			 *  3. It sets up any events needed for the slideshow, including click
+			 *  and slide.
+			 */
+			setupContent();
+			setupSlides();
+			setupEvents();
+		}
+
 		App.init = function(args) {
 
 			args = args || {};
@@ -190,16 +200,7 @@ var ArticleSlideshow = (function($) {
 			if (App.slides.length === 0) return;
 
 			setActiveSlide(0);
-
-			/*
-			 * Setup content goes through the following stages:
-			 *  1. It caches/saves all containers to this object
-			 *  2. It appends all slides to the appropriate containers and caches
-			 *  them.
-			 *  3. It sets up any events needed for the slideshow, including click
-			 *  and slide.
-			 */
-			setupContent();
+			serializedSetup();
 
 			$(App.elements.provider.target).carousel({ interval: false });
 
