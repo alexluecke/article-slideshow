@@ -67,35 +67,28 @@ var ArticleSlideshow = (function($) {
 			'thumbnails': null,
 		};
 
-		// Provider elements reference slideshow provider elements
+		// Slides are an array of objects.
+		App.slides = [];
+
+		// Provider elements reference slideshow elements
 		// (i.e. Twitter Bootstrap)
 		App.conf = {
-			nonce: '',
 			elements: {
-				'wrap': '#article-slideshow-wrapper',
-				thumbnails: {
-					container: '.thumbnails',
-				},
-				provider: {
-					'target': '#article-slideshow', // id of the carousel object
-					'container': '.carousel-inner' // id of the carousel object
+				'target': '#article-slideshow-wrapper',
+				containers: {
+					'slide': '.carousel-inner',
+					'thumbnail': '.thumbnails'
 				},
 			},
 		};
 
-		// Slides are an array of objects.
-		App.slides = [];
-
 		// cache for dom elements
 		App.elements = {
-			provider: {
-				'target': null,
-				'container': null
+			'target': null,
+			containers: {
+				'slide': null,
+				'thumbnail': null,
 			},
-			thumbnails: {
-				container: null,
-			},
-			'wrap': null,
 		};
 
 		function log(e) {
@@ -103,20 +96,19 @@ var ArticleSlideshow = (function($) {
 		}
 
 		function setupContent() {
-			App.elements.provider.target = $(App.conf.elements.provider.target);
-			App.elements.provider.container = App.elements.provider.target
-				.find(App.conf.elements.provider.container).first();
-			App.elements.wrap = $(App.conf.elements.wrap);
-			App.elements.thumbnails.container = App.elements.wrap
-				.find(App.conf.elements.thumbnails.container).first();
+			App.elements.target = $(App.conf.elements.target);
+			App.elements.containers.slide = App.elements.target
+				.find(App.conf.elements.containers.slide).first();
+			App.elements.containers.thumbnail = App.elements.target
+				.find(App.conf.elements.containers.thumbnail).first();
 		}
 
 		function setupSlides() {
 			App.slides.forEach(function(slide) {
-				App.elements.provider.container.append(_t.slide.get(slide));
+				App.elements.containers.slide.append(_t.slide.get(slide));
 			});
 			App.slides.forEach(function(x) {
-				App.elements.thumbnails.container.append(
+				App.elements.containers.thumbnail.append(
 					_t.thumbnail.get(x)
 				);
 			});
@@ -125,24 +117,27 @@ var ArticleSlideshow = (function($) {
 		}
 
 		function cacheSlides() {
-			cache.slides = App.elements.provider.container.find('.item');
+			cache.slides = App.elements.containers.slide.find('.item');
 		}
 
 		function cacheThumbnails() {
-			cache.thumbnails = App.elements.thumbnails.container.find('.thumbnail');
+			cache.thumbnails = App.elements.containers.thumbnail.find('.thumbnail');
 		}
 
 		function setupEvents() {
 			cache.thumbnails.each(function(idx) {
 				var $el = $(this);
 				$el.on('click', function(ev) {
-					App.elements.provider.target.data('bs.carousel').to(idx);
+					// Putting carousel.to() event here seems to have better performance.
+					// I think the multiple events firing simultaneously might have been
+					// stomping on each other in the event loop.
+					App.elements.target.data('bs.carousel').to(idx);
 					cache.thumbnails.removeClass('active');
 					$el.addClass('active');
 					active_index = idx;
 				});
 			});
-			App.elements.provider.target.on('slid.bs.carousel', function () {
+			App.elements.target.on('slid.bs.carousel', function () {
 				cache.slides.each(function(idx) {
 					if ($(this).hasClass('active')) active_index = idx;
 				});
@@ -190,12 +185,17 @@ var ArticleSlideshow = (function($) {
 
 			args = args || {};
 
-			$.extend(App.conf, args.conf || {});
-			$.extend(App.elements.provider, args.elements || {});
-
-			// If user wants to provide their own templates for slides, thumbnails,
-			// and article text:
+			// Options able to be passed in args (see App.conf). Fallback here
+			// indicates the expected type:
+			args.containers = args.containers || {};
+			args.slides = args.slides || [];
+			App.conf.elements.target = args.target || App.conf.elements.target;
 			_t = args.templater || new Templater();
+
+			// Apply args to the object. Expects: $.extend(store-dest, defaults, options):
+			App.conf.elements.containers = $.extend(
+					{}, App.conf.elements.containers, args.containers
+				);
 
 			mergeProvidedSlides(args.slides);
 
@@ -204,7 +204,9 @@ var ArticleSlideshow = (function($) {
 			setActiveSlide(0);
 			serializedSetup();
 
-			$(App.elements.provider.target).carousel({ interval: false });
+			if (!App.elements.target.exists()) return;
+
+			App.elements.target.carousel({ interval: false });
 
 		};
 
@@ -232,4 +234,11 @@ test_slides.push({
 });
 
 var article_slideshow = new ArticleSlideshow();
-article_slideshow.init({ 'slides': test_slides });
+article_slideshow.init({
+	slides: test_slides,
+	target: '#article-slideshow-wrapper',
+	containers: {
+		thumbnail: '.thumbnails',
+		slide: '.carousel-inner',
+	}
+});
