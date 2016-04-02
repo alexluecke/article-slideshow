@@ -4,6 +4,7 @@ var Templater = Templater || (function($) {
 
 		var structs = {
 			'slide': {
+				'index': 0,
 				'active': false,
 				'image': '',
 				'alt': '',
@@ -29,10 +30,12 @@ var Templater = Templater || (function($) {
 				var slide = $.extend({}, structs.slides, s);
 				return $.trim(slide.image) === '' ? ''
 					: [
-						"<img style='width: 50px; height: 50px; float: left;'",
-						" class='thumbnail" + (slide.active ? ' active' : '') + "'",
-						" src='" + slide.image + "' alt='" + slide.alt + "'>"
-					].join('');
+						"<li data-target='#article-slideshow-wrapper'",
+						" data-slide-to='" + slide.index + "'",
+						" class='thumbnail" + (slide.active ? ' active' : '') + "'>",
+						"<div class='cover' style='background-image: url(" + slide.image + ");'>&nbsp;</div>",
+						"</li>"
+					].join("\n");
 			},
 		};
 
@@ -102,8 +105,12 @@ var ArticleSlideshow = (function($) {
 		function loadContent() {
 			App.slides.forEach(function(slide) {
 				App.elements.provider.container.append(_t.slide.get(slide));
-				App.elements.thumbnails_container.append(_t.thumbnail.get(slide));
 			});
+			App.elements.thumbnails_container.append(
+				App.slides.map(function(x) {
+					return _t.thumbnail.html(x);
+				}).join("\n")
+			);
 		}
 
 		function setActiveSlide(idx) {
@@ -124,9 +131,11 @@ var ArticleSlideshow = (function($) {
 
 			// Merge provided slides into App.slides
 			if (Array.isArray(args.slides)) {
+				var idx = 0;
 				args.slides.filter(function(x) {
 					return $.trim(x.image) !== '';
 				}).forEach(function(x) {
+					x.index = idx; idx++;
 					App.slides.push($.extend({}, _t.structs.slide, x));
 				});
 			}
@@ -158,27 +167,10 @@ test_slides.push({
 	'text': 'Testing the first slide 3.',
 });
 
-var custom_template = (function($) {
-	return new Templater({
-		thumbnail: {
-			html: function(s) {
-				var slide = $.extend({}, custom_template.slides, s);
-				return $.trim(slide.image) === '' ? ''
-					: [
-						"<img style='width: 100px; height: 100px; float: right;'",
-						" class='thumbnail" + (slide.active ? ' active' : '') + "'",
-						" src='" + slide.image + "' alt='" + slide.alt + "'>"
-					].join('');
-			},
-		},
-	});
-})(jQuery);
-
 var article_slideshow = new ArticleSlideshow();
 
 article_slideshow.init({
-	'slides': test_slides,
-	'templater': custom_template,
+	'slides': test_slides
 });
 
 /*
