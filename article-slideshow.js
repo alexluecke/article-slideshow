@@ -209,8 +209,11 @@ var ArticleSlideshow = (function($) {
 
 			// Apply args to the object. Expects: $.extend(store-dest, defaults, options):
 			App.conf.elements.containers = $.extend(
-					{}, App.conf.elements.containers, args.containers, typeof args == 'object' && args
-				);
+				{},
+				App.conf.elements.containers,
+				args.containers,
+				typeof args == 'object' && args
+			);
 
 			mergeProvidedSlides(args.slides);
 
