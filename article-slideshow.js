@@ -67,6 +67,8 @@ var ArticleSlideshow = (function($) {
 			'thumbnails': null,
 		};
 
+		App.VERSION = '0.1';
+
 		// Slides are an array of objects.
 		App.slides = [];
 
@@ -91,8 +93,16 @@ var ArticleSlideshow = (function($) {
 			},
 		};
 
-		function log(e) {
-			console.log(e.name + ": " + e.message);
+		function logException(e) {
+			if (window.console) {
+				console.log(e.name + ": " + e.message);
+			}
+		}
+
+		function log(msg) {
+			if (window.console) {
+				console.log(msg);
+			}
 		}
 
 		function setupContent() {
@@ -128,13 +138,13 @@ var ArticleSlideshow = (function($) {
 			cache.thumbnails.each(function(idx) {
 				var $el = $(this);
 				$el.on('click', function(ev) {
+					cache.thumbnails.removeClass('active');
+					$el.addClass('active');
+					active_index = idx;
 					// Putting carousel.to() event here seems to have better performance.
 					// I think the multiple events firing simultaneously might have been
 					// stomping on each other in the event loop.
 					App.elements.target.data('bs.carousel').to(idx);
-					cache.thumbnails.removeClass('active');
-					$el.addClass('active');
-					active_index = idx;
 				});
 			});
 			App.elements.target.on('slid.bs.carousel', function () {
@@ -183,6 +193,11 @@ var ArticleSlideshow = (function($) {
 
 		App.init = function(args) {
 
+			if (typeof $.fn.modal === 'undefined')  {
+				log("Article slideshow requires bootstrap > 3.2.");
+				return;
+			}
+
 			args = args || {};
 
 			// Options able to be passed in args (see App.conf). Fallback here
@@ -194,7 +209,7 @@ var ArticleSlideshow = (function($) {
 
 			// Apply args to the object. Expects: $.extend(store-dest, defaults, options):
 			App.conf.elements.containers = $.extend(
-					{}, App.conf.elements.containers, args.containers
+					{}, App.conf.elements.containers, args.containers, typeof args == 'object' && args
 				);
 
 			mergeProvidedSlides(args.slides);
@@ -206,7 +221,16 @@ var ArticleSlideshow = (function($) {
 
 			if (!App.elements.target.exists()) return;
 
-			App.elements.target.carousel({ interval: false });
+			$('.article-slideshow').carousel({interval: false});
+
+// 			$('#carousel a').on('click', function (ev) {
+// 				if ( $(ev.currentTarget).hasClass('right')) {
+// 					$('#carousel').carousel('next');
+// 				}
+// 				if ( $(ev.currentTarget).hasClass('left')) {
+// 					$('#carousel').carousel('prev');
+// 				}
+// 			})
 
 		};
 
@@ -232,6 +256,11 @@ test_slides.push({
 	'image': '/wp-content/uploads/2016/02/stock-photo-19952282-bamboo-yoga.jpg',
 	'text': 'Testing the first slide 4.',
 });
+test_slides.push({
+	'image': '/wp-content/uploads/2016/02/stock-photo-19952282-bamboo-yoga.jpg',
+	'text': 'Testing the first slide 5.',
+});
+
 
 var article_slideshow = new ArticleSlideshow();
 article_slideshow.init({
