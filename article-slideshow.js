@@ -245,8 +245,8 @@ var ArticleSlideshow = (function($) {
 			 *  1. It caches/saves all containers to this object
 			 *  2. It appends all slides to the appropriate containers and caches
 			 *  them.
-			 *  3. It sets up any events needed for the slideshow, including click
-			 *  and slide.
+			 *  3. It sets up any events needed for the slideshow, including click,
+			 *  slid, and slide.
 			 */
 			setupElements();
 			setupSlides();
