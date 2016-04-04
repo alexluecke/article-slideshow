@@ -189,7 +189,13 @@ var ArticleSlideshow = (function($) {
 			});
 			App.elements.carousels.image.on('slid.bs.carousel', function () {
 				cache.images.each(function(idx) {
-					if ($(this).hasClass('active')) active_index = idx;
+					if ($(this).hasClass('active')) {
+						active_index = idx;
+						// TODO: This might be redundant, but this seems to be needed. The
+						// click events seem to get the slideshows out of whack. Look into
+						// this.
+						App.elements.carousels.article.data('bs.carousel').to(idx);
+					}
 				});
 				cache.thumbnails.each(function(idx) {
 					if (idx !== active_index)
