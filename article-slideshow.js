@@ -200,13 +200,14 @@ var ArticleSlideshow = (function($) {
 			});
 			App.elements.wrap.find('a').each(function(idx) {
 				$(this).on('click', function (ev) {
+					var carousel = '';
 					if ($(ev.currentTarget).hasClass('right')) {
-						App.elements.carousels.image.carousel('next');
-						App.elements.carousels.article.carousel('next');
+						for (carousel in App.elements.carousels)
+							App.elements.carousels[carousel].carousel('next');
 					}
 					if ($(ev.currentTarget).hasClass('left')) {
-						App.elements.carousels.image.carousel('prev');
-						App.elements.carousels.article.carousel('prev');
+						for (carousel in App.elements.carousels)
+							App.elements.carousels[carousel].carousel('next');
 					}
 				});
 			});
