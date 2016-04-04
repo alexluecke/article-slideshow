@@ -12,7 +12,7 @@ var Templater = Templater || (function($) {
 			}
 		};
 
-		var slide = args.slide || {
+		var image = args.image || {
 			html: function(s) {
 				var slide = $.extend({}, structs.slide, s);
 				return $.trim(slide.image) === '' ? ''
@@ -30,7 +30,7 @@ var Templater = Templater || (function($) {
 				var slide = $.extend({}, structs.slides, s);
 				return $.trim(slide.image) === '' ? ''
 					: [
-						"<li data-target='#article-slideshow-wrapper'",
+						"<li data-target='#image-carousel'",
 						" class='thumbnail" + (slide.active ? ' active' : '') + "'>",
 						"<div class='cover' style='background-image: url(" + slide.image + ");'>&nbsp;</div>",
 						"</li>"
@@ -39,14 +39,15 @@ var Templater = Templater || (function($) {
 		};
 
 		// Make getters for the objects.
-		[slide, thumbnail].forEach(function(x) {
+		[image, thumbnail].forEach(function(x) {
 			x.get = function(s) { return $(x.html(s)); };
 		});
 
 		return {
-			'slide': slide,
-			'thumbnail': thumbnail,
+			'article': '',
+			'image': image,
 			'structs': structs,
+			'thumbnail': thumbnail,
 		};
 	};
 })(jQuery);
@@ -63,8 +64,9 @@ var ArticleSlideshow = (function($) {
 		var active_index = 0;
 
 		var cache = {
-			'slides': null,
+			'images': null,
 			'thumbnails': null,
+			'articles': null,
 		};
 
 		App.VERSION = '0.1';
@@ -76,20 +78,30 @@ var ArticleSlideshow = (function($) {
 		// (i.e. Twitter Bootstrap)
 		App.conf = {
 			elements: {
-				'target': '#article-slideshow-wrapper',
+				'wrap': '#article-slideshow-wrapper',
+				carousels: {
+					'image': '#image-carousel',
+					'article': '#article-carousel',
+				},
 				containers: {
-					'slide': '.carousel-inner',
-					'thumbnail': '.thumbnails'
+					'image': '.images',
+					'thumbnail': '.thumbnails',
+					'article': '.articles',
 				},
 			},
 		};
 
 		// cache for dom elements
 		App.elements = {
-			'target': null,
+			'wrap': null,
+			carousels: {
+				'image': null,
+				'article': null,
+			},
 			containers: {
-				'slide': null,
+				'image': null,
 				'thumbnail': null,
+				'article': null,
 			},
 		};
 
@@ -105,29 +117,39 @@ var ArticleSlideshow = (function($) {
 			}
 		}
 
-		function setupContent() {
-			App.elements.target = $(App.conf.elements.target);
-			App.elements.containers.slide = App.elements.target
-				.find(App.conf.elements.containers.slide).first();
-			App.elements.containers.thumbnail = App.elements.target
+		function setupElements() {
+			App.elements.wrap = $(App.conf.elements.wrap);
+			App.elements.carousels.image = $(App.conf.elements.carousels.image);
+			App.elements.carousels.article = $(App.conf.elements.carousels.article);
+			App.elements.containers.image = App.elements.wrap
+				.find(App.conf.elements.containers.image).first();
+			App.elements.containers.article = App.elements.wrap
+				.find(App.conf.elements.containers.article).first();
+			App.elements.containers.thumbnail = App.elements.wrap
 				.find(App.conf.elements.containers.thumbnail).first();
 		}
 
 		function setupSlides() {
 			App.slides.forEach(function(slide) {
-				App.elements.containers.slide.append(_t.slide.get(slide));
+				App.elements.containers.image.append(_t.image.get(slide));
 			});
-			App.slides.forEach(function(x) {
+			App.slides.forEach(function(slide) {
 				App.elements.containers.thumbnail.append(
-					_t.thumbnail.get(x)
+					_t.thumbnail.get(slide)
 				);
 			});
-			cacheSlides();
+			// TODO: generalize the cache functions.
+			cacheImages();
+			cacheArticles();
 			cacheThumbnails();
 		}
 
-		function cacheSlides() {
-			cache.slides = App.elements.containers.slide.find('.item');
+		function cacheImages() {
+			cache.slides = App.elements.containers.image.find('.item');
+		}
+
+		function cacheArticles() {
+			cache.slides = App.elements.containers.article.find('.item');
 		}
 
 		function cacheThumbnails() {
@@ -143,17 +165,19 @@ var ArticleSlideshow = (function($) {
 					active_index = idx;
 					// Putting carousel.to() event here seems to have better performance.
 					// I think the multiple events firing simultaneously might have been
-					// stomping on each other in the event loop.
-					App.elements.target.data('bs.carousel').to(idx);
+					// stomping on each other in the event loop. Also, I need the buttons
+					// to trigger two separate slideshows (one image, one article).
+					App.elements.carousels.image.data('bs.carousel').to(idx);
+					//App.elements.carousels.article.data('bs.carousel').to(idx);
 				});
 			});
-			App.elements.target.on('slid.bs.carousel', function () {
+			App.elements.carousels.image.on('slid.bs.carousel', function () {
 				cache.slides.each(function(idx) {
 					if ($(this).hasClass('active')) active_index = idx;
 				});
-			});
-			cache.thumbnails.each(function(idx) {
-				if (idx !== active_index) $(this).removeClass('active');
+				cache.thumbnails.each(function(idx) {
+					if (idx !== active_index) $(this).removeClass('active');
+				});
 			});
 		}
 
@@ -186,7 +210,7 @@ var ArticleSlideshow = (function($) {
 			 *  3. It sets up any events needed for the slideshow, including click
 			 *  and slide.
 			 */
-			setupContent();
+			setupElements();
 			setupSlides();
 			setupEvents();
 		}
@@ -203,16 +227,23 @@ var ArticleSlideshow = (function($) {
 			// Options able to be passed in args (see App.conf). Fallback here
 			// indicates the expected type:
 			args.containers = args.containers || {};
+			args.carousels = args.carousels || {};
 			args.slides = args.slides || [];
-			App.conf.elements.target = args.target || App.conf.elements.target;
 			_t = args.templater || new Templater();
+
+			App.conf.elements.wrap = args.wrap || App.conf.elements.wrap;
 
 			// Apply args to the object. Expects: $.extend(store-dest, defaults, options):
 			App.conf.elements.containers = $.extend(
 				{},
 				App.conf.elements.containers,
-				args.containers,
-				typeof args == 'object' && args
+				args.containers
+			);
+
+			App.conf.elements.carousels = $.extend(
+				{},
+				App.conf.elements.carousels,
+				args.carousels
 			);
 
 			mergeProvidedSlides(args.slides);
@@ -222,9 +253,11 @@ var ArticleSlideshow = (function($) {
 			setActiveSlide(0);
 			serializedSetup();
 
-			if (!App.elements.target.exists()) return;
 
-			$('.article-slideshow').carousel({interval: false});
+			if (!App.elements.wrap.exists()) return;
+
+			// Disable auto-slide for all slideshows (images, articles, etc):
+			$('.article-slideshow').carousel({ interval: false });
 
 // 			$('#carousel a').on('click', function (ev) {
 // 				if ( $(ev.currentTarget).hasClass('right')) {
@@ -264,13 +297,18 @@ test_slides.push({
 	'text': 'Testing the first slide 5.',
 });
 
-
 var article_slideshow = new ArticleSlideshow();
+
 article_slideshow.init({
 	slides: test_slides,
-	target: '#article-slideshow-wrapper',
+	wrap: '#article-slideshow-wrapper',
 	containers: {
+		article: '.articles',
+		images: '.images',
 		thumbnail: '.thumbnails',
-		slide: '.carousel-inner',
-	}
+	},
+	carousels: {
+		image: '#image-carousel',
+		article: '#article-carousel',
+	},
 });
