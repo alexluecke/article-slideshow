@@ -193,6 +193,18 @@ var ArticleSlideshow = (function($) {
 					if (idx !== active_index) $(this).removeClass('active');
 				});
 			});
+			App.elements.wrap.find('a').each(function(idx) {
+				$(this).on('click', function (ev) {
+					if ($(ev.currentTarget).hasClass('right')) {
+						App.elements.carousels.image.carousel('next');
+						App.elements.carousels.article.carousel('next');
+					}
+					if ($(ev.currentTarget).hasClass('left')) {
+						App.elements.carousels.image.carousel('prev');
+						App.elements.carousels.article.carousel('prev');
+					}
+				});
+			});
 		}
 
 		// TODO: I need to figure out a way to consolidate this method with the set
@@ -267,24 +279,11 @@ var ArticleSlideshow = (function($) {
 			setActiveSlide(0);
 			serializedSetup();
 
-
 			if (!App.elements.wrap.exists()) return;
 
 			// Disable auto-slide for all slideshows (images, articles, etc):
 			$('.article-slideshow').carousel({ interval: false });
 
-			App.elements.wrap.find('a').each(function(idx) {
-				$(this).on('click', function (ev) {
-					if ($(ev.currentTarget).hasClass('right')) {
-						App.elements.carousels.image.carousel('next');
-						App.elements.carousels.article.carousel('next');
-					}
-					if ($(ev.currentTarget).hasClass('left')) {
-						App.elements.carousels.image.carousel('prev');
-						App.elements.carousels.article.carousel('prev');
-					}
-				});
-			});
 		};
 
 		return App;
