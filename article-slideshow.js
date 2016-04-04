@@ -156,11 +156,11 @@ var ArticleSlideshow = (function($) {
 		}
 
 		function cacheImages() {
-			cache.slides = App.elements.containers.image.find('.item');
+			cache.images = App.elements.containers.image.find('.item');
 		}
 
 		function cacheArticles() {
-			cache.slides = App.elements.containers.article.find('.item');
+			cache.articles = App.elements.containers.article.find('.item');
 		}
 
 		function cacheThumbnails() {
@@ -171,26 +171,31 @@ var ArticleSlideshow = (function($) {
 			cache.thumbnails.each(function(idx) {
 				var $el = $(this);
 				$el.on('click', function(ev) {
-					cache.thumbnails.removeClass('active');
-					$el.addClass('active');
-					active_index = idx;
 					// Putting carousel.to() event here seems to have better performance.
 					// I think the multiple events firing simultaneously might have been
 					// stomping on each other in the event loop. Also, I need the buttons
 					// to trigger two separate slideshows (one image, one article).
 					App.elements.carousels.image.data('bs.carousel').to(idx);
 					App.elements.carousels.article.data('bs.carousel').to(idx);
+					cache.thumbnails.removeClass('active');
+					$el.addClass('active');
+					active_index = idx;
 				});
 			});
 			App.elements.carousels.image.on('slide.bs.carousel', function () {
 				App.slides.forEach(function(slide) {
 					slide.active = false;
 				});
-				cache.slides.each(function(idx) {
+			});
+			App.elements.carousels.image.on('slid.bs.carousel', function () {
+				cache.images.each(function(idx) {
 					if ($(this).hasClass('active')) active_index = idx;
 				});
 				cache.thumbnails.each(function(idx) {
-					if (idx !== active_index) $(this).removeClass('active');
+					if (idx !== active_index)
+						$(this).removeClass('active');
+					else
+						$(this).addClass('active');
 				});
 			});
 			App.elements.wrap.find('a').each(function(idx) {
