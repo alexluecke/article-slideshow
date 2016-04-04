@@ -135,9 +135,9 @@ var ArticleSlideshow = (function($) {
 			App.elements.wrap = $(App.conf.elements.wrap);
 			App.elements.carousels.image = $(App.conf.elements.carousels.image);
 			App.elements.carousels.article = $(App.conf.elements.carousels.article);
-			App.elements.containers.image = App.elements.wrap
+			App.elements.containers.image = App.elements.carousels.image
 				.find(App.conf.elements.containers.image).first();
-			App.elements.containers.article = App.elements.wrap
+			App.elements.containers.article = App.elements.carousels.article
 				.find(App.conf.elements.containers.article).first();
 			App.elements.containers.thumbnail = App.elements.wrap
 				.find(App.conf.elements.containers.thumbnail).first();
@@ -286,6 +286,12 @@ var ArticleSlideshow = (function($) {
 			serializedSetup();
 
 			if (!App.elements.wrap.exists()) return;
+			for (var carousel in App.elements.carousels) {
+				if (!App.elements.carousels[carousel].exists()) {
+					log("One of the carousels provided does not exist.");
+					return;
+				}
+			}
 
 			// Disable auto-slide for all slideshows (images, articles, etc):
 			$('.article-slideshow').carousel({ interval: false });
