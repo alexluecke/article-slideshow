@@ -25,6 +25,17 @@ var Templater = Templater || (function($) {
 			},
 		};
 
+		var article = args.article || {
+			html: function(s) {
+				var slide = $.extend({}, structs.slide, s);
+				return [
+						"<div class='article item" + (slide.active ? ' active' : '') + "'>",
+						"\t<p>" + slide.text + "</p>",
+						"</div>"
+					].join("\n");
+			},
+		};
+
 		var thumbnail = args.thumbnail || {
 			html: function(s) {
 				var slide = $.extend({}, structs.slides, s);
@@ -39,12 +50,12 @@ var Templater = Templater || (function($) {
 		};
 
 		// Make getters for the objects.
-		[image, thumbnail].forEach(function(x) {
+		[article, image, thumbnail].forEach(function(x) {
 			x.get = function(s) { return $(x.html(s)); };
 		});
 
 		return {
-			'article': '',
+			'article': article,
 			'image': image,
 			'structs': structs,
 			'thumbnail': thumbnail,
@@ -132,11 +143,8 @@ var ArticleSlideshow = (function($) {
 		function setupSlides() {
 			App.slides.forEach(function(slide) {
 				App.elements.containers.image.append(_t.image.get(slide));
-			});
-			App.slides.forEach(function(slide) {
-				App.elements.containers.thumbnail.append(
-					_t.thumbnail.get(slide)
-				);
+				App.elements.containers.thumbnail.append(_t.thumbnail.get(slide));
+				App.elements.containers.article.append(_t.article.get(slide));
 			});
 			// TODO: generalize the cache functions.
 			cacheImages();
@@ -168,7 +176,7 @@ var ArticleSlideshow = (function($) {
 					// stomping on each other in the event loop. Also, I need the buttons
 					// to trigger two separate slideshows (one image, one article).
 					App.elements.carousels.image.data('bs.carousel').to(idx);
-					//App.elements.carousels.article.data('bs.carousel').to(idx);
+					App.elements.carousels.article.data('bs.carousel').to(idx);
 				});
 			});
 			App.elements.carousels.image.on('slid.bs.carousel', function () {
