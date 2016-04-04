@@ -6,9 +6,11 @@ var Templater = Templater || (function($) {
 			'slide': {
 				'index': 0,
 				'active': false,
+				'title': '',
 				'image': '',
 				'alt': '',
 				'text': '',
+				'caption': '',
 			}
 		};
 
@@ -19,7 +21,7 @@ var Templater = Templater || (function($) {
 					: [
 						"<div class='item" + (slide.active ? ' active' : '') + "'>",
 						"\t<img src='" + slide.image + "' alt='" + slide.alt + "'>",
-						"\t<div class='carousel-caption'>" + slide.text + "</div>",
+						"\t<div class='carousel-caption'>" + slide.caption + "</div>",
 						"</div>"
 					].join("\n");
 			},
@@ -30,6 +32,7 @@ var Templater = Templater || (function($) {
 				var slide = $.extend({}, structs.slide, s);
 				return [
 						"<div class='article item" + (slide.active ? ' active' : '') + "'>",
+						"\t<h2>" + slide.title + "</h2>",
 						"\t<p>" + slide.text + "</p>",
 						"</div>"
 					].join("\n");
@@ -179,7 +182,10 @@ var ArticleSlideshow = (function($) {
 					App.elements.carousels.article.data('bs.carousel').to(idx);
 				});
 			});
-			App.elements.carousels.image.on('slid.bs.carousel', function () {
+			App.elements.carousels.image.on('slide.bs.carousel', function () {
+				App.slides.forEach(function(slide) {
+					slide.active = false;
+				});
 				cache.slides.each(function(idx) {
 					if ($(this).hasClass('active')) active_index = idx;
 				});
@@ -267,15 +273,18 @@ var ArticleSlideshow = (function($) {
 			// Disable auto-slide for all slideshows (images, articles, etc):
 			$('.article-slideshow').carousel({ interval: false });
 
-// 			$('#carousel a').on('click', function (ev) {
-// 				if ( $(ev.currentTarget).hasClass('right')) {
-// 					$('#carousel').carousel('next');
-// 				}
-// 				if ( $(ev.currentTarget).hasClass('left')) {
-// 					$('#carousel').carousel('prev');
-// 				}
-// 			})
-
+			App.elements.wrap.find('a').each(function(idx) {
+				$(this).on('click', function (ev) {
+					if ($(ev.currentTarget).hasClass('right')) {
+						App.elements.carousels.image.carousel('next');
+						App.elements.carousels.article.carousel('next');
+					}
+					if ($(ev.currentTarget).hasClass('left')) {
+						App.elements.carousels.image.carousel('prev');
+						App.elements.carousels.article.carousel('prev');
+					}
+				});
+			});
 		};
 
 		return App;
@@ -290,19 +299,25 @@ test_slides.push({
 });
 test_slides.push({
 	'image': '/wp-content/uploads/2016/02/stock-photo-19952282-bamboo-yoga.jpg',
-	'text': 'Testing the first slide 2.',
+	'text': 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.' +
+'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',
+	'caption': 'Some caption here 2.',
+	'title': 'Title 2',
 });
 test_slides.push({
 	'image': '/wp-content/uploads/2016/02/stock-photo-19952282-bamboo-yoga.jpg',
 	'text': 'Testing the first slide 3.',
+	'title': 'Title 3',
 });
 test_slides.push({
 	'image': '/wp-content/uploads/2016/02/stock-photo-19952282-bamboo-yoga.jpg',
 	'text': 'Testing the first slide 4.',
+	'title': 'Title 4',
 });
 test_slides.push({
 	'image': '/wp-content/uploads/2016/02/stock-photo-19952282-bamboo-yoga.jpg',
 	'text': 'Testing the first slide 5.',
+	'title': 'Title 5',
 });
 
 var article_slideshow = new ArticleSlideshow();
