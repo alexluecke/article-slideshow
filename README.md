@@ -36,10 +36,10 @@ The structure of the slideshow might look something like the following:
       </div>
     </div>
 
-The only important elements to this structure are the following:
+The only important features to this HTML structure are:
 
-- Each carousel needs to have the classes `.article-slideshow` and `.carousel`
-- The carousels themselves are not nested
+- The carousels need to have the classes `article-slideshow` and `carousel`
+- The carousels themselves should not be not nested
 
 All other elements are customizable both in structure and class/id nomenclature.
 
@@ -90,5 +90,7 @@ You can define your own templates for images, articles, and thumbnails with the 
     };
 
     var my_templater = new Templater(image_template);
+
+**Important**: All template sub-items should have the class `item`.
 
 Possible templates are: `image`, `article`, and `thumbnail`.

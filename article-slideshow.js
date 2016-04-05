@@ -14,9 +14,13 @@ var Templater = Templater || (function($) {
 			}
 		};
 
+		var extendSlide = function(s) {
+				return  $.extend({}, structs.slide, s);
+    };
+
 		var image = args.image || {
 			html: function(s) {
-				var slide = $.extend({}, structs.slide, s);
+        var slide = extendSlide(s);
 				return $.trim(slide.image) === '' ? ''
 					: [
 						"<div class='item" + (slide.active ? ' active' : '') + "'>",
@@ -29,7 +33,7 @@ var Templater = Templater || (function($) {
 
 		var article = args.article || {
 			html: function(s) {
-				var slide = $.extend({}, structs.slide, s);
+        var slide = extendSlide(s);
 				return [
 						"<div class='article item" + (slide.active ? ' active' : '') + "'>",
 						"\t<h2>" + slide.title + "</h2>",
@@ -41,7 +45,7 @@ var Templater = Templater || (function($) {
 
 		var thumbnail = args.thumbnail || {
 			html: function(s) {
-				var slide = $.extend({}, structs.slides, s);
+        var slide = extendSlide(s);
 				return $.trim(slide.image) === '' ? ''
 					: [
 						"<li data-target='#image-carousel'",
@@ -62,6 +66,7 @@ var Templater = Templater || (function($) {
 			'image': image,
 			'structs': structs,
 			'thumbnail': thumbnail,
+			'extendSlide': extendSlide,
 		};
 	};
 })(jQuery);
@@ -153,6 +158,14 @@ var ArticleSlideshow = (function($) {
 			cacheImages();
 			cacheArticles();
 			cacheThumbnails();
+
+		  cache.articles.each(function() { $(this).removeClass('active'); });
+		  cache.images.each(function() { $(this).removeClass('active'); });
+		  cache.thumbnails.each(function() { $(this).removeClass('active'); });
+
+      for (var prop in cache) {
+        $(cache[prop][0]).addClass('active');
+      }
 		}
 
 		function cacheImages() {
@@ -219,14 +232,6 @@ var ArticleSlideshow = (function($) {
 			});
 		}
 
-		// TODO: I need to figure out a way to consolidate this method with the set
-		// click events that set the active slide based on the dom.
-		function setActiveSlide(idx) {
-			idx = Number.parseInt(idx || 0);
-			App.slides.forEach(function(x) { x.active = false; });
-			App.slides[idx].active = true;
-		}
-
 		function mergeProvidedSlides(slides) {
 			if (Array.isArray(slides)) {
 				var idx = 0;
@@ -234,7 +239,7 @@ var ArticleSlideshow = (function($) {
 					return $.trim(x.image) !== '';
 				}).forEach(function(x) {
 					x.index = idx; idx++;
-					App.slides.push($.extend({}, _t.structs.slide, x));
+					App.slides.push(_t.extendSlide(x));
 				});
 			}
 		}
@@ -288,7 +293,6 @@ var ArticleSlideshow = (function($) {
 
 			if (App.slides.length === 0) return;
 
-			setActiveSlide(0);
 			serializedSetup();
 
 			if (!App.elements.wrap.exists()) return;
@@ -342,6 +346,7 @@ var article_slideshow = new ArticleSlideshow();
 article_slideshow.init({
 	slides: test_slides,
 	wrap: '#article-slideshow-wrapper',
+  templater: new Templater(),
 	containers: {
 		article: '.articles',
 		images: '.images',
