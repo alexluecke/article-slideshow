@@ -15,7 +15,7 @@ var Templater = Templater || (function($) {
 		};
 
 		var extendSlide = function(s) {
-				return  $.extend({}, structs.slide, s);
+			return  $.extend({}, structs.slide, s);
 		};
 
 		var image = args.image || {
@@ -159,12 +159,12 @@ var ArticleSlideshow = (function($) {
 			cacheArticles();
 			cacheThumbnails();
 
-			cache.articles.each(function() { $(this).removeClass('active'); });
-			cache.images.each(function() { $(this).removeClass('active'); });
-			cache.thumbnails.each(function() { $(this).removeClass('active'); });
+			var prop;
+			var f = function(idx, el) { $(el).removeClass('active'); };
 
-			for (var prop in cache) {
-				$(cache[prop][0]).addClass('active');
+			for (prop in cache) {
+				$(cache[prop]).each(f);
+				$(cache[prop]).first().addClass('active');
 			}
 		}
 
