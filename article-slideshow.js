@@ -16,11 +16,11 @@ var Templater = Templater || (function($) {
 
 		var extendSlide = function(s) {
 				return  $.extend({}, structs.slide, s);
-    };
+		};
 
 		var image = args.image || {
 			html: function(s) {
-        var slide = extendSlide(s);
+				var slide = extendSlide(s);
 				return $.trim(slide.image) === '' ? ''
 					: [
 						"<div class='item" + (slide.active ? ' active' : '') + "'>",
@@ -33,7 +33,7 @@ var Templater = Templater || (function($) {
 
 		var article = args.article || {
 			html: function(s) {
-        var slide = extendSlide(s);
+				var slide = extendSlide(s);
 				return [
 						"<div class='article item" + (slide.active ? ' active' : '') + "'>",
 						"\t<h2>" + slide.title + "</h2>",
@@ -45,7 +45,7 @@ var Templater = Templater || (function($) {
 
 		var thumbnail = args.thumbnail || {
 			html: function(s) {
-        var slide = extendSlide(s);
+				var slide = extendSlide(s);
 				return $.trim(slide.image) === '' ? ''
 					: [
 						"<li data-target='#image-carousel'",
@@ -159,13 +159,13 @@ var ArticleSlideshow = (function($) {
 			cacheArticles();
 			cacheThumbnails();
 
-		  cache.articles.each(function() { $(this).removeClass('active'); });
-		  cache.images.each(function() { $(this).removeClass('active'); });
-		  cache.thumbnails.each(function() { $(this).removeClass('active'); });
+			cache.articles.each(function() { $(this).removeClass('active'); });
+			cache.images.each(function() { $(this).removeClass('active'); });
+			cache.thumbnails.each(function() { $(this).removeClass('active'); });
 
-      for (var prop in cache) {
-        $(cache[prop][0]).addClass('active');
-      }
+			for (var prop in cache) {
+				$(cache[prop][0]).addClass('active');
+			}
 		}
 
 		function cacheImages() {
@@ -346,7 +346,7 @@ var article_slideshow = new ArticleSlideshow();
 article_slideshow.init({
 	slides: test_slides,
 	wrap: '#article-slideshow-wrapper',
-  templater: new Templater(),
+	templater: new Templater(),
 	containers: {
 		article: '.articles',
 		images: '.images',
