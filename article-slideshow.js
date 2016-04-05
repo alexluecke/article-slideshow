@@ -80,7 +80,6 @@ var ArticleSlideshow = (function($) {
 
 		var App = {};
 		var _t = null;
-		var active_index = 0;
 
 		var cache = {
 			'images': null,
@@ -173,12 +172,19 @@ var ArticleSlideshow = (function($) {
 			cache.thumbnails = App.elements.containers.thumbnail.find('.thumbnail');
 		}
 
+		function setInactive(idx, el) {
+			$(el).removeClass('active');
+		}
+
+		function setActive(idx, el) {
+			$(el).addClass('active');
+		}
+
 		function setActiveElementsByIndex(idx) {
-			var f = function(idx, el) { $(el).removeClass('active'); };
 			// First element should be active initially:
 			for (var prop in cache) {
-				$(cache[prop]).each(f); // remove all active
-				$(cache[prop][idx]).addClass('active'); // make idx active
+				$(cache[prop]).each(setInactive); // remove all active
+				setActive(idx, cache[prop][idx]); // make idx active
 			}
 		}
 
@@ -192,33 +198,28 @@ var ArticleSlideshow = (function($) {
 					// to trigger two separate slideshows (one image, one article).
 					App.elements.carousels.image.data('bs.carousel').to(idx);
 					App.elements.carousels.article.data('bs.carousel').to(idx);
-					cache.thumbnails.removeClass('active');
+					cache.thumbnails.each(setInactive);
 					$el.addClass('active');
-					active_index = idx;
 				});
 			});
 			App.elements.carousels.image.on('slide.bs.carousel', function () {
-				App.slides.forEach(function(slide) {
-					slide.active = false;
-				});
+				// Put events triggered by `slide` here.
 			});
 			App.elements.carousels.image.on('slid.bs.carousel', function () {
+				cache.thumbnails.each(setInactive);
+				cache.articles.each(setInactive);
 				cache.images.each(function(idx) {
 					if ($(this).hasClass('active')) {
-						active_index = idx;
 						// TODO: This might be redundant, but this seems to be needed. The
 						// click events seem to get the slideshows out of whack. Look into
 						// this.
 						App.elements.carousels.article.data('bs.carousel').to(idx);
+						// Make sure items share active state:
+						setActiveElementsByIndex(idx);
 					}
 				});
-				cache.thumbnails.each(function(idx) {
-					if (idx !== active_index)
-						$(this).removeClass('active');
-					else
-						$(this).addClass('active');
-				});
 			});
+			// TODO: (maybe) disable buttons when sliding.
 			App.elements.wrap.find('a').each(function(idx) {
 				$(this).on('click', function (ev) {
 					var carousel = '';
