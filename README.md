@@ -1,5 +1,15 @@
 # Article Slide Show
 
+## Dependencies:
+
+- Boostrap > v3.2.x
+- jQuery > v2.0.x
+
+
+## Recommended:
+
+- Font awesome > 4.5.x
+
 ## Elements
 
 Each slideshow wrapper needs to contain the class `.article-slideshow` so that the plug-in can disable automatic sliding. This can also be done by targeting the slideshow element with the following:
