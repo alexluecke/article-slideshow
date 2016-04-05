@@ -49,7 +49,7 @@ var Templater = Templater || (function($) {
 				return $.trim(slide.image) === '' ? ''
 					: [
 						"<li data-target='#image-carousel'",
-						" class='thumbnail item" + (slide.active ? ' active' : '') + "'>",
+						" class='slide-thumb item" + (slide.active ? ' active' : '') + "'>",
 						"<div class='cover' style='background-image: url(" + slide.image + ");'>&nbsp;</div>",
 						"</li>"
 					].join("\n");
@@ -80,7 +80,6 @@ var ArticleSlideshow = (function($) {
 
 		var App = {};
 		var _t = null;
-
 		var cache = {
 			'images': null,
 			'thumbnails': null,
@@ -160,34 +159,6 @@ var ArticleSlideshow = (function($) {
 			setActiveElementsByIndex(0);
 		}
 
-		function cacheImages() {
-			cache.images = App.elements.containers.image.find('.item');
-		}
-
-		function cacheArticles() {
-			cache.articles = App.elements.containers.article.find('.item');
-		}
-
-		function cacheThumbnails() {
-			cache.thumbnails = App.elements.containers.thumbnail.find('.thumbnail');
-		}
-
-		function setInactive(idx, el) {
-			$(el).removeClass('active');
-		}
-
-		function setActive(idx, el) {
-			$(el).addClass('active');
-		}
-
-		function setActiveElementsByIndex(idx) {
-			// First element should be active initially:
-			for (var prop in cache) {
-				$(cache[prop]).each(setInactive); // remove all active
-				setActive(idx, cache[prop][idx]); // make idx active
-			}
-		}
-
 		function setupEvents() {
 			cache.thumbnails.each(function(idx) {
 				var $el = $(this);
@@ -229,10 +200,38 @@ var ArticleSlideshow = (function($) {
 					}
 					if ($(ev.currentTarget).hasClass('left')) {
 						for (carousel in App.elements.carousels)
-							App.elements.carousels[carousel].carousel('next');
+							App.elements.carousels[carousel].carousel('prev');
 					}
 				});
 			});
+		}
+
+		function cacheImages() {
+			cache.images = App.elements.containers.image.find('.item');
+		}
+
+		function cacheArticles() {
+			cache.articles = App.elements.containers.article.find('.item');
+		}
+
+		function cacheThumbnails() {
+			cache.thumbnails = App.elements.containers.thumbnail.find('.item');
+		}
+
+		function setInactive(idx, el) {
+			$(el).removeClass('active');
+		}
+
+		function setActive(idx, el) {
+			$(el).addClass('active');
+		}
+
+		function setActiveElementsByIndex(idx) {
+			// First element should be active initially:
+			for (var prop in cache) {
+				$(cache[prop]).each(setInactive); // remove all active
+				setActive(idx, cache[prop][idx]); // make idx active
+			}
 		}
 
 		function mergeSlides(slides) {
@@ -264,7 +263,7 @@ var ArticleSlideshow = (function($) {
 		App.init = function(args) {
 
 			if (typeof $.fn.modal === 'undefined')  {
-				log("Article slideshow requires bootstrap > 3.2.");
+				log("Article slideshow requires Bootstrap > 3.2.x");
 				return;
 			}
 
