@@ -75,7 +75,7 @@ While you can use the default classes already declared in the Article slideshow 
 
 ## Templater -- make your own templates
 
-You can define your own templates for images, articles, and thumbnails with the `Templater` class. Each template function takes a slide object (see `Templater().strucuts.slide` for default slide structure). For example, if you wish to create and `article` template, you can do the following:
+You can define your own templates for images, articles, and thumbnails with the `Templater` class. Each template function takes a slide object (see `structs.slide` within `Templater` object for default slide structure). For example, if you wish to create and `article` template, you can do the following:
 
     var templater_args = {
       article: {
