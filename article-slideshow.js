@@ -235,7 +235,7 @@ var ArticleSlideshow = (function($) {
 			});
 		}
 
-		function mergeProvidedSlides(slides) {
+		function mergeSlides(slides) {
 			if (Array.isArray(slides)) {
 				var idx = 0;
 				slides.filter(function(x) {
@@ -292,7 +292,7 @@ var ArticleSlideshow = (function($) {
 				args.carousels
 			);
 
-			mergeProvidedSlides(args.slides);
+			mergeSlides(args.slides);
 
 			if (App.slides.length === 0) return;
 
