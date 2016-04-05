@@ -106,3 +106,22 @@ You can define your own templates for images, articles, and thumbnails with the 
 **Important**: All template sub-items should have the class `item`.
 
 Possible templates are: `image`, `article`, and `thumbnail`.
+
+## Changing animation transitions:
+
+For faster transitions, add the following css:
+
+	.carousel-inner .item {
+		-webkit-transition: 0.4s ease-in-out left;
+		-moz-transition: 0.4s ease-in-out left;
+		-o-transition: 0.4s ease-in-out left;
+		transition: 0.4s ease-in-out left;
+	}
+
+	.carousel-inner .active,
+	.carousel-inner .next,
+	.carousel-inner .prev {
+		display: block;
+	}
+
+Note: You need to re-declare the active classes after the adjusted transitions.
