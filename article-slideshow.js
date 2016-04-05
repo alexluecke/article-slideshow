@@ -23,7 +23,7 @@ var Templater = Templater || (function($) {
 				var slide = extendSlide(s);
 				return $.trim(slide.image) === '' ? ''
 					: [
-						"<div class='item" + (slide.active ? ' active' : '') + "'>",
+						"<div class='image item" + (slide.active ? ' active' : '') + "'>",
 						"\t<img src='" + slide.image + "' alt='" + slide.alt + "'>",
 						"\t<div class='carousel-caption'>" + slide.caption + "</div>",
 						"</div>"
@@ -49,7 +49,7 @@ var Templater = Templater || (function($) {
 				return $.trim(slide.image) === '' ? ''
 					: [
 						"<li data-target='#image-carousel'",
-						" class='thumbnail" + (slide.active ? ' active' : '') + "'>",
+						" class='thumbnail item" + (slide.active ? ' active' : '') + "'>",
 						"<div class='cover' style='background-image: url(" + slide.image + ");'>&nbsp;</div>",
 						"</li>"
 					].join("\n");
