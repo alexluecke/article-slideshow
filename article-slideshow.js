@@ -158,14 +158,7 @@ var ArticleSlideshow = (function($) {
 			cacheImages();
 			cacheArticles();
 			cacheThumbnails();
-
-			var prop;
-			var f = function(idx, el) { $(el).removeClass('active'); };
-
-			for (prop in cache) {
-				$(cache[prop]).each(f);
-				$(cache[prop]).first().addClass('active');
-			}
+			setActiveElementsByIndex(0);
 		}
 
 		function cacheImages() {
@@ -178,6 +171,15 @@ var ArticleSlideshow = (function($) {
 
 		function cacheThumbnails() {
 			cache.thumbnails = App.elements.containers.thumbnail.find('.thumbnail');
+		}
+
+		function setActiveElementsByIndex(idx) {
+			var f = function(idx, el) { $(el).removeClass('active'); };
+			// First element should be active initially:
+			for (var prop in cache) {
+				$(cache[prop]).each(f); // remove all active
+				$(cache[prop][idx]).addClass('active'); // make idx active
+			}
 		}
 
 		function setupEvents() {
