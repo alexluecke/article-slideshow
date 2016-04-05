@@ -199,7 +199,7 @@ var ArticleSlideshow = (function($) {
 					App.elements.carousels.image.data('bs.carousel').to(idx);
 					App.elements.carousels.article.data('bs.carousel').to(idx);
 					cache.thumbnails.each(setInactive);
-					$el.addClass('active');
+					setActive(idx, $el);
 				});
 			});
 			App.elements.carousels.image.on('slide.bs.carousel', function () {
