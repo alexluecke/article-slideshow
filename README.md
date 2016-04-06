@@ -81,7 +81,8 @@ While you can use the default classes already declared in the Article slideshow 
       },
     };
 
-    var my_article_slideshow = new ArticleSlideshow(my_conf);
+    var my_article_slideshow = new ArticleSlideshow();
+    my_article_slideshow.init(my_conf);
 
 Above is all possible configurable parameters.
 
