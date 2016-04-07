@@ -62,7 +62,7 @@ While you can use the default classes already declared in the Article slideshow 
       slides: slide_array,
 
       // Template system for images, slides, and article text:
-      templater: new Templater(),
+      templater: new SlideTemplater(),
 
       // Outermost element of the article slideshow:
       wrap: '#article-slideshow-wrapper',
@@ -86,9 +86,9 @@ While you can use the default classes already declared in the Article slideshow 
 
 Above is all possible configurable parameters.
 
-## Templater -- make your own templates
+## SlideTemplater -- make your own templates
 
-You can define your own templates for images, articles, and thumbnails with the `Templater` class. Each template function takes a slide object (see `structs.slide` within `Templater` object for default slide structure). For example, if you wish to create and `article` template, you can do the following:
+You can define your own templates for images, articles, and thumbnails with the `SlideTemplater` class. Each template function takes a slide object (see `structs.slide` within `SlideTemplater` object for default slide structure). For example, if you wish to create and `article` template, you can do the following:
 
     var args = {
       article: {
@@ -96,13 +96,13 @@ You can define your own templates for images, articles, and thumbnails with the 
         // All templates have an `html` member function that takes a slide object
         // as an argument and returns an HTML string:
         html: function(s) {
-          // See Templater's structs for available slide properties:
+          // See SlideTemplater's structs for available slide properties:
           return "<div class='article item'><h1>" + s.text + "</h1></div>";
         },
       },
     };
 
-    var my_templater = new Templater(args);
+    var my_templater = new SlideTemplater(args);
 
 **Important**: All template sub-items should have the class `item`.
 

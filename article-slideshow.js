@@ -1,4 +1,4 @@
-var Templater = Templater || (function($) {
+var SlideTemplater = SlideTemplater || (function($) {
 	return $ === null ? null : function(args) {
 		args = args || {};
 
@@ -108,6 +108,10 @@ var ArticleSlideshow = (function($) {
 			},
 		};
 
+		App.classes = {
+			'item': 'item',
+		};
+
 		// cache for dom elements
 		App.elements = {
 			'wrap': null,
@@ -207,15 +211,15 @@ var ArticleSlideshow = (function($) {
 		}
 
 		function cacheImages() {
-			cache.images = App.elements.containers.image.find('.item');
+			cache.images = App.elements.containers.image.find(App.classes.item);
 		}
 
 		function cacheArticles() {
-			cache.articles = App.elements.containers.article.find('.item');
+			cache.articles = App.elements.containers.article.find(App.classes.item);
 		}
 
 		function cacheThumbnails() {
-			cache.thumbnails = App.elements.containers.thumbnail.find('.item');
+			cache.thumbnails = App.elements.containers.thumbnail.find(App.classes.item);
 		}
 
 		function setInactive(idx, el) {
@@ -274,7 +278,7 @@ var ArticleSlideshow = (function($) {
 			args.containers = args.containers || {};
 			args.carousels = args.carousels || {};
 			args.slides = args.slides || [];
-			_t = args.templater || new Templater();
+			_t = args.templater || new SlideTemplater();
 
 			App.conf.elements.wrap = args.wrap || App.conf.elements.wrap;
 
@@ -292,9 +296,7 @@ var ArticleSlideshow = (function($) {
 			);
 
 			mergeSlides(args.slides);
-
 			if (App.slides.length === 0) return;
-
 			serializedSetup();
 
 			if (!App.elements.wrap.exists()) return;
@@ -307,7 +309,6 @@ var ArticleSlideshow = (function($) {
 
 			// Disable auto-slide for all slideshows (images, articles, etc):
 			$('.article-slideshow').carousel({ interval: false });
-
 		};
 
 		return App;
