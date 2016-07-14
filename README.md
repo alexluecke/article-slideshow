@@ -88,7 +88,7 @@ Above is all possible configurable parameters.
 
 ## SlideTemplater -- make your own templates
 
-You can define your own templates for images, articles, and thumbnails with the `SlideTemplater` class. Each template function takes a slide object (see `structs.slide` within `SlideTemplater` object for default slide structure). For example, if you wish to create and `article` template, you can do the following:
+You can define your own templates for images, articles, and thumbnails with the `SlideTemplater` class. Each template function takes a slide object (see `structs.slide` within `SlideTemplater` object for default slide structure). For example, to create an `article` template, do the following:
 
     var args = {
       article: {
