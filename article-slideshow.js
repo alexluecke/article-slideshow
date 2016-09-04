@@ -108,7 +108,7 @@ var ArticleSlideshow = function() {
 	};
 
 	App.classes = {
-		'item': 'item',
+		'item': '.item',
 	};
 
 	// cache for dom elements
