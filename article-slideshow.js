@@ -8,6 +8,7 @@ var SlideTemplater = SlideTemplater || function(args) {
 			'active': false,
 			'title': '',
 			'image': '',
+			'thumbnail': '',
 			'alt': '',
 			'text': '',
 			'caption': '',
@@ -46,11 +47,12 @@ var SlideTemplater = SlideTemplater || function(args) {
 	var thumbnail = args.thumbnail || {
 		html: function(s) {
 			var slide = extendSlide(s);
-			return $.trim(slide.image) === '' ? ''
+			slide.thumbnail = slide.thumbnail || slide.image;
+			return $.trim(slide.thumbnail) === '' ? ''
 				: [
 					"<li data-target='#image-carousel'",
 					" class='slide-thumb item" + (slide.active ? ' active' : '') + "'>",
-					"<div class='cover' style='background-image: url(" + slide.image + ");'>&nbsp;</div>",
+					"<div class='cover' style='background-image: url(" + slide.thumbnail + ");'>&nbsp;</div>",
 					"</li>"
 				].join("\n");
 		},
